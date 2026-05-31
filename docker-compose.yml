@@ -3,16 +3,11 @@ services:
     build: .
     container_name: apps-manager
     restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Hier passiert die Magie
+      - /opt/apps/services:/opt/apps/services     # Zugriff auf die Apps
+      - /opt/apps/manager/apps.json:/opt/apps/manager/apps.json
     ports:
       - "8000:8000"
-    volumes:
-      # Docker-Socket des Hosts -> Backend kann Container steuern/abfragen
-      - /var/run/docker.sock:/var/run/docker.sock
-      # /opt/apps unter IDENTISCHEM Pfad mounten. Wichtig, weil "docker compose"
-      # ueber den Host-Daemon laeuft: Build-Kontext und Bind-Mounts der App-
-      # Compose-Files muessen auf Host und im Container denselben Pfad haben.
-      - /opt/apps:/opt/apps
     environment:
-      - APPS_CONFIG=/opt/apps/manager/apps.json
-      # Webhook-Secret aus .env oder Shell. Leer = Signaturpruefung deaktiviert.
-      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
